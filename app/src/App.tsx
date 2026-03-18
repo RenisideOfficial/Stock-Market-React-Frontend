@@ -1,7 +1,17 @@
-import React, { lazy, Suspense } from "react";
+// App.tsx
+import React, { lazy, Suspense, useEffect } from "react";
 import Navbar from "./components/Navbar";
-import { Container, Box, Spacer, Text, Link, Spinner } from "@chakra-ui/react";
-import { Route, Routes } from "react-router-dom";
+import {
+  Container,
+  Box,
+  Spinner,
+  VStack,
+  Text,
+  useColorModeValue,
+} from "@chakra-ui/react";
+import { Route, Routes, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
@@ -28,41 +38,94 @@ export type Position = {
   regularMarketChangePercent: number;
 };
 
-function App() {
-  // Stock format: {symbol, count, price}
-  // const [selectedAction, setSelectedAction] = useState("buy");
-  // const [selelectedStock, setSelectedStock] = useState({
-  // 	symbol: "",
-  // 	price: 0,
-  // });
+// Loading component
+const PageLoader = () => (
+  <VStack justify="center" align="center" minH="400px" spacing={4}>
+    <Spinner size="xl" color="cyan.500" thickness="4px" />
+    <Text color="gray.500">Loading...</Text>
+  </VStack>
+);
 
-  // const [selectedPrice, setSelectedPrice] = useState(0);
+// Page transition wrapper
+const PageWrapper = ({ children }: { children: React.ReactNode }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.3 }}>
+    {children}
+  </motion.div>
+);
+
+function App() {
+  const location = useLocation();
+  const bgColor = useColorModeValue("gray.50", "gray.900");
+
+  useEffect(() => {
+    // Scroll to top on route change
+    window.scrollTo(0, 0);
+  }, [location]);
 
   return (
-    <>
+    <Box minH="100vh" bg={bgColor}>
       <Navbar />
-      <Container maxW="container.xl">
-        <Spacer h="10" />
-        <Box>
-          <Suspense fallback={<Spinner />}>
-            <Routes>
-              <Route path="/" element={<Dashboard />}></Route>
-
-              <Route path="/login" element={<Login />}></Route>
-
-              <Route path="/signup" element={<Signup />}></Route>
-
-              <Route path="/leaderboard" element={<Leaderboard />}></Route>
-
-              <Route path="/stocks/:symbol" element={<StockView />}></Route>
-
-              {/* Add 404*/}
-              <Route path="*" element={<NotFound />}></Route>
+      <Container maxW="container.xl" py={6}>
+        <AnimatePresence mode="wait">
+          <Suspense fallback={<PageLoader />}>
+            <Routes location={location} key={location.pathname}>
+              <Route
+                path="/"
+                element={
+                  <PageWrapper>
+                    <Dashboard />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/login"
+                element={
+                  <PageWrapper>
+                    <Login />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/signup"
+                element={
+                  <PageWrapper>
+                    <Signup />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/leaderboard"
+                element={
+                  <PageWrapper>
+                    <Leaderboard />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/stocks/:symbol"
+                element={
+                  <PageWrapper>
+                    <StockView />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="*"
+                element={
+                  <PageWrapper>
+                    <NotFound />
+                  </PageWrapper>
+                }
+              />
             </Routes>
           </Suspense>
-        </Box>
+        </AnimatePresence>
       </Container>
-    </>
+    </Box>
   );
 }
 

@@ -1,3 +1,4 @@
+// Navbar.tsx
 import React, { RefObject, useEffect, useRef } from "react";
 import {
   HStack,
@@ -8,218 +9,226 @@ import {
   Box,
   Drawer,
   DrawerBody,
-  DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
   DrawerContent,
   DrawerCloseButton,
   useDisclosure,
   Stack,
-  useTheme,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Image,
+  useColorModeValue,
+  Container,
+  Badge,
 } from "@chakra-ui/react";
 
 import { Link, useLocation, NavLink } from "react-router-dom";
-import { HamburgerIcon, MoonIcon, StarIcon, SunIcon } from "@chakra-ui/icons";
+import { Menu, Moon, Sun, LayoutDashboard, Trophy } from "lucide-react";
 import SearchBox from "./SearchBox";
 import AccountMenu from "./AccountMenu";
 
 export default function Navbar() {
   const { toggleColorMode, colorMode } = useColorMode();
   const location = useLocation();
-
-  // Mobile nav menu
   const { isOpen, onOpen, onClose } = useDisclosure();
   const mobileMenuBtn =
     useRef<HTMLButtonElement>() as RefObject<HTMLButtonElement>;
 
+  const bgColor = useColorModeValue(
+    "rgba(255, 255, 255, 0.8)",
+    "rgba(26, 32, 44, 0.8)",
+  );
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const activeColor = useColorModeValue("cyan.500", "cyan.300");
+  const textColor = useColorModeValue("gray.600", "gray.300");
+
   useEffect(() => {
-    if (isOpen) {
-      onClose();
-    }
+    if (isOpen) onClose();
   }, [location]);
 
+  const navItems = [
+    { path: "/", label: "Dashboard", icon: LayoutDashboard },
+    { path: "/leaderboard", label: "Leaderboard", icon: Trophy },
+  ];
+
   return (
-    <HStack
-      className="Navbar"
+    <Box
+      as="nav"
+      position="sticky"
+      top={0}
+      zIndex="sticky"
+      bg={bgColor}
+      backdropFilter="blur(10px)"
       borderBottomWidth="1px"
-      p="5"
-      display="flex"
-      justifyContent="space-between">
-      {/* Left Side */}
-      <Flex gap={7}>
-        <Text as={Link} to="/" display="flex" alignItems="center" gap="1">
-          <Image src="/logo.svg" alt="SMS Logo" boxSize="6" />
-          <Text fontWeight="bold">Stock Mart</Text>
-        </Text>
-        <NavLink
-          style={({ isActive }) => {
-            return {
-              fontWeight: isActive ? "500" : "",
-            };
-          }}
-          to="/">
-          <Text display={{ base: "none", md: "block" }}>Dashboard</Text>
-        </NavLink>
-        <NavLink
-          style={({ isActive }) => {
-            return {
-              fontWeight: isActive ? "500" : "",
-            };
-          }}
-          to="/leaderboard">
-          <Text display={{ base: "none", md: "block" }}>Leaderboard</Text>
-        </NavLink>
-      </Flex>
+      borderColor={borderColor}>
+      <Container maxW="container.xl">
+        <HStack py={4} justify="space-between">
+          {/* Logo */}
+          <Flex gap={8} align="center">
+            <Text
+              as={Link}
+              to="/"
+              fontSize="xl"
+              fontWeight="bold"
+              letterSpacing="tight"
+              display="flex"
+              alignItems="center"
+              gap={2}>
+              {/* SVG Logo */}
+              <Box boxSize="32px" display="flex" alignItems="center">
+                <svg
+                  viewBox="0 0 120 120"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ width: "100%", height: "100%" }}>
+                  <circle cx="60" cy="60" r="55" fill="#0F172A" />
 
-      {/* Center */}
-      <SearchBox />
-
-      {/* Right Side */}
-      <Box>
-        <HStack spacing="2" display={{ base: "none", md: "flex" }}>
-          <IconButton
-            variant="outline"
-            aria-label="Toggle dark mode"
-            icon={colorMode == "light" ? <SunIcon /> : <MoonIcon />}
-            onClick={() => toggleColorMode()}
-          />
-          <Menu>
-            <MenuButton
-              as={IconButton}
-              aria-label="Options"
-              icon={<StarIcon />}
-              variant="outline"
-            />
-            <MenuList minW="auto" px="2" pt="1">
-              {[
-                "red",
-                "orange",
-                "yellow",
-                "green",
-                "blue",
-                "teal",
-                "cyan",
-                "purple",
-                "pink",
-              ].map((color) => (
-                <MenuItem
-                  mt="1"
-                  as={IconButton}
-                  aria-label={color}
-                  variant="ghost"
-                  bg={color + ".500"}
-                  _hover={{
-                    border: "3px solid",
-                    borderColor: color + ".300",
-                    bg: color + ".400",
-                  }}
-                  key={color}
-                  onClick={() => {
-                    localStorage.setItem("accentColor", color);
-                    window.location.reload();
-                  }}></MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
-          <AccountMenu />
-        </HStack>
-
-        <Box display={{ base: "block", md: "none" }}>
-          <IconButton
-            aria-label="Hamburger menu"
-            icon={<HamburgerIcon />}
-            ref={mobileMenuBtn}
-            colorScheme={
-              useTheme()["components"]["Link"]["baseStyle"]["color"].split(
-                ".",
-              )[0]
-            }
-            onClick={onOpen}
-          />
-          <Drawer
-            isOpen={isOpen}
-            placement="top"
-            onClose={onClose}
-            finalFocusRef={mobileMenuBtn}>
-            <DrawerOverlay />
-            <DrawerContent>
-              <DrawerCloseButton />
-              <DrawerHeader>
-                <Text as={Link} to="/">
-                  <Text fontWeight="bold">Stock Mart</Text>
-                </Text>
-              </DrawerHeader>
-
-              <DrawerBody>
-                <Stack spacing="2.5">
-                  <Text as={Link} to="/">
-                    <Text>Dashboard</Text>
-                  </Text>
-                  <Text as={Link} to="/leaderboard">
-                    <Text>Leaderboard</Text>
-                  </Text>
-                </Stack>
-              </DrawerBody>
-
-              <DrawerFooter>
-                <HStack spacing="2" width="100%">
-                  <IconButton
-                    variant="outline"
-                    aria-label="Toggle dark mode"
-                    icon={colorMode == "light" ? <SunIcon /> : <MoonIcon />}
-                    onClick={() => toggleColorMode()}
+                  <rect
+                    x="30"
+                    y="60"
+                    width="8"
+                    height="20"
+                    rx="2"
+                    fill="#22C55E"
                   />
-                  <Menu>
-                    <MenuButton
-                      as={IconButton}
-                      aria-label="Options"
-                      icon={<StarIcon />}
-                      variant="outline"
-                    />
-                    <MenuList minW="auto" px="2" pt="1">
-                      {[
-                        "red",
-                        "orange",
-                        "yellow",
-                        "green",
-                        "blue",
-                        "teal",
-                        "cyan",
-                        "purple",
-                        "pink",
-                      ].map((color) => (
-                        <MenuItem
-                          mt="1"
-                          as={IconButton}
-                          aria-label={color}
-                          variant="ghost"
-                          bg={"var(--chakra-colors-" + color + "-500)"}
-                          _hover={{
-                            border: "3px solid",
-                            borderColor:
-                              "var(--chakra-colors-" + color + "-300)",
-                            bg: "var(--chakra-colors-" + color + "-400)",
-                          }}
-                          key={color}
-                          onClick={() => {
-                            localStorage.setItem("accentColor", color);
-                            window.location.reload();
-                          }}></MenuItem>
-                      ))}
-                    </MenuList>
-                  </Menu>
-                  <AccountMenu />
-                </HStack>
-              </DrawerFooter>
-            </DrawerContent>
-          </Drawer>
-        </Box>
-      </Box>
-    </HStack>
+                  <rect
+                    x="45"
+                    y="50"
+                    width="8"
+                    height="30"
+                    rx="2"
+                    fill="#22C55E"
+                  />
+                  <rect
+                    x="60"
+                    y="40"
+                    width="8"
+                    height="40"
+                    rx="2"
+                    fill="#22C55E"
+                  />
+
+                  <path
+                    d="M28 65 L45 55 L60 45 L80 30"
+                    stroke="#4ADE80"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+
+                  <g transform="translate(83,28) rotate(-37)">
+                    <path d="M0 0 L-9 -5 L-9 5 Z" fill="#4ADE80" />
+                  </g>
+                </svg>
+              </Box>
+              Stock<span style={{ color: "#06B6D4" }}>Mart</span>
+            </Text>
+
+            {/* Desktop Navigation */}
+            <HStack spacing={1} display={{ base: "none", md: "flex" }}>
+              {navItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <NavLink key={item.path} to={item.path}>
+                    <HStack
+                      px={4}
+                      py={2}
+                      borderRadius="full"
+                      color={isActive ? activeColor : textColor}
+                      bg={isActive ? `${activeColor}10` : "transparent"}
+                      _hover={{ bg: `${activeColor}10` }}
+                      transition="all 0.2s"
+                      spacing={2}>
+                      <item.icon size={18} />
+                      <Text fontWeight={isActive ? "600" : "500"}>
+                        {item.label}
+                      </Text>
+                    </HStack>
+                  </NavLink>
+                );
+              })}
+            </HStack>
+          </Flex>
+
+          {/* Search */}
+          <Box flex="1" maxW="400px" mx={4}>
+            <SearchBox />
+          </Box>
+
+          {/* Right Section */}
+          <HStack spacing={3}>
+            {/* Theme Toggle */}
+            <IconButton
+              variant="ghost"
+              aria-label="Toggle theme"
+              icon={
+                colorMode === "light" ? <Moon size={20} /> : <Sun size={20} />
+              }
+              onClick={toggleColorMode}
+              rounded="full"
+              _hover={{ bg: `${activeColor}10` }}
+            />
+
+            {/* Desktop Account Menu */}
+            <Box display={{ base: "none", md: "block" }}>
+              <AccountMenu />
+            </Box>
+
+            {/* Mobile Menu Button */}
+            <IconButton
+              display={{ base: "flex", md: "none" }}
+              variant="ghost"
+              aria-label="Open menu"
+              icon={<Menu size={20} />}
+              onClick={onOpen}
+              rounded="full"
+              ref={mobileMenuBtn}
+            />
+          </HStack>
+        </HStack>
+      </Container>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        isOpen={isOpen}
+        placement="right"
+        onClose={onClose}
+        finalFocusRef={mobileMenuBtn}>
+        <DrawerOverlay backdropFilter="blur(10px)" />
+        <DrawerContent bg={bgColor} backdropFilter="blur(10px)">
+          <DrawerCloseButton />
+          <DrawerHeader borderBottomWidth="1px" borderColor={borderColor}>
+            <Text fontSize="xl" fontWeight="bold">
+              Menu
+            </Text>
+          </DrawerHeader>
+
+          <DrawerBody>
+            <Stack spacing={4} mt={4}>
+              {navItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <NavLink key={item.path} to={item.path} onClick={onClose}>
+                    <HStack
+                      p={3}
+                      borderRadius="lg"
+                      bg={isActive ? `${activeColor}10` : "transparent"}
+                      color={isActive ? activeColor : textColor}
+                      _hover={{ bg: `${activeColor}10` }}
+                      spacing={3}>
+                      <item.icon size={20} />
+                      <Text fontWeight={isActive ? "600" : "500"}>
+                        {item.label}
+                      </Text>
+                    </HStack>
+                  </NavLink>
+                );
+              })}
+              <Box pt={4} borderTopWidth="1px" borderColor={borderColor}>
+                <AccountMenu />
+              </Box>
+            </Stack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+    </Box>
   );
 }

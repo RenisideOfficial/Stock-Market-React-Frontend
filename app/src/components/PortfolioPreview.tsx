@@ -1,120 +1,153 @@
+// PortfolioPreview.tsx
 import React, { useState, useEffect } from "react";
 import {
-	Box,
-	Flex,
-	Heading,
-	Spacer,
-	Spinner,
-	Text,
-	useToast,
+  Box,
+  Flex,
+  Heading,
+  Text,
+  Spinner,
+  useToast,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  StatArrow,
+  VStack,
+  useColorModeValue,
+  CircularProgress,
+  CircularProgressLabel,
 } from "@chakra-ui/react";
 import accounts from "../services/accounts.service";
 import tokens from "../services/tokens.service";
 import { useNavigate } from "react-router-dom";
+import { TrendingUp, DollarSign } from "lucide-react";
 
 const formatter = new Intl.NumberFormat("en-US", {
-	style: "currency",
-	currency: "USD",
+  style: "currency",
+  currency: "USD",
 });
 
 function PortfolioPreview() {
-	const [portfolioValue, setPortfolioValue] = useState(-1);
-	const [prevCloseValue, setPrevCloseValue] = useState(0.0);
-	const [cash, setCash] = useState(0.0);
-	const [isLoading, setIsLoading] = useState(true);
+  const [portfolioValue, setPortfolioValue] = useState(-1);
+  const [prevCloseValue, setPrevCloseValue] = useState(0.0);
+  const [cash, setCash] = useState(0.0);
+  const [isLoading, setIsLoading] = useState(true);
 
-	const toast = useToast();
-	const navigate = useNavigate();
+  const toast = useToast();
+  const navigate = useNavigate();
 
-	useEffect(() => {
-		accounts
-			.getPortfolio()
-			.then(({ portfolioValue, portfolioPrevCloseValue, cash }) => {
-				setPortfolioValue(portfolioValue);
-				setPrevCloseValue(portfolioPrevCloseValue);
-				setCash(cash);
-				setIsLoading(false);
-			})
-			.catch((err) => {
-				if (err.response && err.response.status === 401) {
-					tokens.clearToken();
-					toast({
-						title: `You are not logged in! Redirecting to login...`,
-						status: "error",
-						isClosable: true,
-					});
-					navigate("/login");
-				}
-			});
-	}, []);
+  const bgColor = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const textColor = useColorModeValue("gray.600", "gray.400");
 
-	return (
-		<Flex className="PortfolioPreview">
-			<Box flex="0.5">
-				{isLoading ? (
-					<Spinner size={"lg"} />
-				) : (
-					<>
-						<Heading as="h4" size="sm" color="gray.500" fontWeight="600">
-							Total Investment
-						</Heading>
-						<Spacer h="1" />
-						<Heading as="h2" size="xl">
-							{formatter.format(portfolioValue)}
-						</Heading>
-					</>
-				)}
-				{portfolioValue > 0 ? (
-					<Heading
-						as="h2"
-						size="md"
-						color={portfolioValue > prevCloseValue ? "green.500" : "red.500"}
-					>
-						{portfolioValue > prevCloseValue ? "▲" : "▼"}
-						<Text as="span" fontWeight="800" px="1">
-							{formatter.format(portfolioValue - prevCloseValue)}
-						</Text>
-						<Text as="span" fontWeight="500">
-							(
-							{
-								// Show 4 decimal places if the change is less than 0.01%
-								(
-									100 *
-									((portfolioValue - prevCloseValue) / prevCloseValue)
-								).toFixed(
-									Math.abs(
-										100 * ((portfolioValue - prevCloseValue) / prevCloseValue),
-									) < 0.01
-										? 4
-										: 2,
-								)
-							}
-							%){" "}
-						</Text>
-					</Heading>
-				) : (
-					<Heading as="h2" size="md" fontWeight="normal">
-						Make some trades to get started!
-					</Heading>
-				)}
-			</Box>
-			<Box flex="0.5">
-				{isLoading ? (
-					<Spinner size={"lg"} />
-				) : (
-					<>
-						<Heading as="h4" size="sm" color="gray.500" fontWeight="600">
-							Cash (Buying Power)
-						</Heading>
-						<Spacer h="1" />
-						<Heading as="h2" size="xl">
-							{formatter.format(cash)}
-						</Heading>
-					</>
-				)}
-			</Box>
-		</Flex>
-	);
+  useEffect(() => {
+    accounts
+      .getPortfolio()
+      .then(({ portfolioValue, portfolioPrevCloseValue, cash }) => {
+        setPortfolioValue(portfolioValue);
+        setPrevCloseValue(portfolioPrevCloseValue);
+        setCash(cash);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          tokens.clearToken();
+          toast({
+            title: "Session expired",
+            description: "Please login again",
+            status: "error",
+          });
+          navigate("/login");
+        }
+      });
+  }, []);
+
+  const change = portfolioValue - prevCloseValue;
+  const changePercent = (change / prevCloseValue) * 100 || 0;
+  const isPositive = change >= 0;
+
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" h="200px">
+        <CircularProgress
+          isIndeterminate
+          color="cyan.500"
+          size="80px"
+          thickness="4px"
+        />
+      </Flex>
+    );
+  }
+
+  return (
+    <Box
+      bg={bgColor}
+      borderWidth="1px"
+      borderColor={borderColor}
+      borderRadius="2xl"
+      p={6}
+      shadow="lg">
+      <VStack spacing={6} align="stretch">
+        <Flex gap={8} direction={{ base: "column", md: "row" }}>
+          {/* Portfolio Value */}
+          <Stat flex="1">
+            <StatLabel
+              fontSize="sm"
+              color={textColor}
+              display="flex"
+              alignItems="center"
+              gap={2}>
+              <TrendingUp size={16} />
+              Total Investment
+            </StatLabel>
+            <StatNumber fontSize="4xl" fontWeight="bold">
+              {formatter.format(portfolioValue)}
+            </StatNumber>
+            {portfolioValue > 0 && (
+              <StatHelpText>
+                <StatArrow type={isPositive ? "increase" : "decrease"} />
+                {formatter.format(Math.abs(change))} ({changePercent.toFixed(2)}
+                %)
+              </StatHelpText>
+            )}
+          </Stat>
+
+          {/* Cash */}
+          <Stat flex="1">
+            <StatLabel
+              fontSize="sm"
+              color={textColor}
+              display="flex"
+              alignItems="center"
+              gap={2}>
+              <DollarSign size={16} />
+              Buying Power
+            </StatLabel>
+            <StatNumber fontSize="4xl" fontWeight="bold">
+              {formatter.format(cash)}
+            </StatNumber>
+            <StatHelpText>Available to trade</StatHelpText>
+          </Stat>
+        </Flex>
+
+        {portfolioValue === 0 && (
+          <Box
+            p={4}
+            bg="cyan.50"
+            _dark={{ bg: "cyan.900" }}
+            borderRadius="lg"
+            textAlign="center">
+            <Text
+              color="cyan.600"
+              _dark={{ color: "cyan.200" }}
+              fontWeight="medium">
+              🚀 Start trading to build your portfolio!
+            </Text>
+          </Box>
+        )}
+      </VStack>
+    </Box>
+  );
 }
 
 export default PortfolioPreview;
