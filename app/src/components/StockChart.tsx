@@ -1,4 +1,3 @@
-// StockChart.tsx - FIXED for visible chart lines
 import React, { useState, useRef, useEffect } from "react";
 import * as Highcharts from "highcharts/highstock";
 import HighchartsReact from "highcharts-react-official";
@@ -12,7 +11,14 @@ import {
   Button,
   Text,
   VStack,
+  useBreakpointValue,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  IconButton,
 } from "@chakra-ui/react";
+import { ChevronDown } from "lucide-react";
 
 // Initialize modules
 import highchartsAccessibility from "highcharts/modules/accessibility";
@@ -46,6 +52,9 @@ export default function StockChart(props: { symbol: string }) {
   const textColor = useColorModeValue("gray.900", "white");
   const gridColor = useColorModeValue("#E2E8F0", "#2D3748");
 
+  // Responsive breakpoint
+  const isMobile = useBreakpointValue({ base: true, md: false });
+
   const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
     rangeSelector: {
       enabled: false,
@@ -76,7 +85,7 @@ export default function StockChart(props: { symbol: string }) {
       tickColor: gridColor,
     },
     chart: {
-      height: 500,
+      height: isMobile ? 350 : 500,
       backgroundColor: bgColor,
       borderRadius: 12,
       style: {
@@ -88,8 +97,8 @@ export default function StockChart(props: { symbol: string }) {
     },
     navigator: {
       enabled: true,
-      height: 50,
-      margin: 30,
+      height: isMobile ? 30 : 50,
+      margin: isMobile ? 20 : 30,
       series: {
         color: accentColor,
         lineWidth: 1,
@@ -244,37 +253,91 @@ export default function StockChart(props: { symbol: string }) {
     }
   }, [props.symbol, location]);
 
+  // Get the selected period label for mobile dropdown
+  const selectedPeriodLabel =
+    periods.find((p) => p.value === selectedPeriod)?.label || "1M";
+
   return (
     <Box
       bg={bgColor}
       borderRadius="xl"
       borderWidth="1px"
       borderColor={useColorModeValue("gray.200", "gray.700")}
-      p={4}
+      p={{ base: 3, md: 4 }}
       shadow="lg">
       <VStack spacing={4} align="stretch">
-        <HStack justify="space-between" wrap="wrap" spacing={2}>
-          <Text fontSize="lg" fontWeight="bold">
+        <HStack
+          justify="space-between"
+          align="center"
+          direction={{ base: "column", sm: "row" }}
+          spacing={{ base: 2, sm: 2 }}>
+          <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold">
             {props.symbol} Price Chart
           </Text>
-          <HStack spacing={1}>
-            {periods.map((period) => (
-              <Button
-                key={period.value}
+
+          {/* Desktop period selector */}
+          {!isMobile && (
+            <HStack spacing={1} flexWrap="wrap" justify="flex-end">
+              {periods.map((period) => (
+                <Button
+                  key={period.value}
+                  size="sm"
+                  variant={selectedPeriod === period.value ? "solid" : "ghost"}
+                  colorScheme={
+                    selectedPeriod === period.value ? "cyan" : "gray"
+                  }
+                  onClick={() => fetchStockData(period.value)}
+                  borderRadius="full"
+                  px={3}
+                  minW="auto"
+                  height="32px"
+                  fontSize="sm"
+                  _hover={{ transform: "translateY(-1px)" }}>
+                  {period.label}
+                </Button>
+              ))}
+            </HStack>
+          )}
+
+          {/* Mobile period selector dropdown */}
+          {isMobile && (
+            <Menu>
+              <MenuButton
+                as={Button}
+                rightIcon={<ChevronDown size={16} />}
                 size="sm"
-                variant={selectedPeriod === period.value ? "solid" : "ghost"}
-                colorScheme={selectedPeriod === period.value ? "cyan" : "gray"}
-                onClick={() => fetchStockData(period.value)}
+                colorScheme="cyan"
+                variant="outline"
                 borderRadius="full"
-                px={3}
-                _hover={{ transform: "translateY(-1px)" }}>
-                {period.label}
-              </Button>
-            ))}
-          </HStack>
+                px={4}
+                width="100%">
+                {selectedPeriodLabel}
+              </MenuButton>
+              <MenuList minW="120px">
+                {periods.map((period) => (
+                  <MenuItem
+                    key={period.value}
+                    onClick={() => fetchStockData(period.value)}
+                    bg={
+                      selectedPeriod === period.value
+                        ? "cyan.50"
+                        : "transparent"
+                    }
+                    color={
+                      selectedPeriod === period.value ? "cyan.500" : "inherit"
+                    }
+                    fontWeight={
+                      selectedPeriod === period.value ? "bold" : "normal"
+                    }>
+                    {period.label}
+                  </MenuItem>
+                ))}
+              </MenuList>
+            </Menu>
+          )}
         </HStack>
 
-        <Box position="relative" minH="500px">
+        <Box position="relative" minH={{ base: "350px", md: "500px" }}>
           {isLoading && (
             <Box
               position="absolute"

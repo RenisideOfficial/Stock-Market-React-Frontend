@@ -69,7 +69,10 @@ function App() {
   return (
     <Box minH="100vh" bg={bgColor}>
       <Navbar />
-      <Container maxW="container.xl" py={6}>
+      <Container
+        maxW="container.xl"
+        py={{ base: 1, md: 6 }}
+        px={{ base: 1, md: 4 }}>
         <AnimatePresence mode="wait">
           <Suspense fallback={<PageLoader />}>
             <Routes location={location} key={location.pathname}>
