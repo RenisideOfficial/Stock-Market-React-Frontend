@@ -181,6 +181,24 @@ function SearchBox() {
           )}
         </PopoverBody>
       </PopoverContent>
+      {/* No results message - make it responsive */}
+      {isOpen && query !== "" && results.length === 0 && (
+        <Box
+          position="absolute"
+          zIndex="popover"
+          bg={bgColor}
+          borderWidth="1px"
+          borderColor={borderColor}
+          borderRadius="xl"
+          shadow="xl"
+          w={{ base: "calc(100vw - 32px)", md: "400px" }}
+          maxW="400px"
+          mt={1}
+          p={4}
+          textAlign="center">
+          <Text color={textColor}>No results found</Text>
+        </Box>
+      )}
     </Popover>
   );
 }

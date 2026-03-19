@@ -12,6 +12,7 @@ import {
   Icon,
   Button,
   Fade,
+  HStack,
 } from "@chakra-ui/react";
 import PortfolioPreview from "../components/PortfolioPreview";
 import React from "react";
@@ -29,94 +30,116 @@ export default function Dashboard() {
   const accentColor = useColorModeValue("cyan.500", "cyan.300");
 
   return (
-    <Box className="Dashboard" bg={bgColor} minH="100vh">
-      <Container maxW="container.xl" py={8}>
-        <VStack spacing={8} align="stretch">
-          {/* Header */}
-          <Flex justify="space-between" align="center">
-            <VStack align="start" spacing={1}>
-              <Heading size="lg" display="flex" alignItems="center" gap={2}>
-                <Icon as={Layout} color={accentColor} />
-                Dashboard
+    <Box
+      className="Dashboard"
+      bg={bgColor}
+      minH="100vh"
+      w="full"
+      overflowX="hidden">
+      <VStack spacing={{ base: 4, md: 8 }} align="stretch" w="full">
+        {/* Header */}
+        <Flex justify="space-between" align="center" wrap="wrap" gap={2}>
+          <VStack align="start" spacing={0}>
+            <Heading
+              size={{ base: "md", md: "lg" }}
+              display="flex"
+              alignItems="center"
+              gap={2}>
+              <Icon as={Layout} color={accentColor} />
+              Dashboard
+            </Heading>
+            <Text fontSize={{ base: "xs", md: "sm" }} color="gray.500">
+              Welcome back to StockMart
+            </Text>
+          </VStack>
+        </Flex>
+
+        {/* Non-authenticated user banner */}
+        {!tokens.isAuthenticated() && (
+          <Box
+            bg={cardBg}
+            borderWidth="1px"
+            borderColor={borderColor}
+            borderRadius="xl"
+            p={{ base: 4, md: 8 }}
+            textAlign="center"
+            shadow="lg">
+            <VStack spacing={4}>
+              <Icon
+                as={TrendingUp}
+                boxSize={{ base: 8, md: 12 }}
+                color={accentColor}
+              />
+              <Heading size={{ base: "md", md: "lg" }}>
+                Start Trading Today
               </Heading>
-              <Text color="gray.500">Welcome back to StockMart</Text>
+              <Text
+                fontSize={{ base: "sm", md: "md" }}
+                color="gray.500"
+                maxW="md">
+                Join thousands of traders in the most realistic stock market
+                simulation
+              </Text>
+              <HStack spacing={4} pt={2} wrap="wrap" justify="center">
+                <Button
+                  as={RouterLink}
+                  to="/signup"
+                  colorScheme="cyan"
+                  size={{ base: "sm", md: "lg" }}
+                  leftIcon={<UserPlus size={16} />}
+                  borderRadius="full">
+                  Create Account
+                </Button>
+                <Button
+                  as={RouterLink}
+                  to="/login"
+                  variant="outline"
+                  size={{ base: "sm", md: "lg" }}
+                  leftIcon={<LogIn size={16} />}
+                  borderRadius="full">
+                  Sign In
+                </Button>
+              </HStack>
             </VStack>
-          </Flex>
+          </Box>
+        )}
 
-          {!tokens.isAuthenticated() && (
-            <Fade in>
-              <Box
-                bg={cardBg}
-                borderWidth="1px"
-                borderColor={borderColor}
-                borderRadius="2xl"
-                p={8}
-                textAlign="center"
-                shadow="lg">
-                <VStack spacing={4}>
-                  <Icon as={TrendingUp} boxSize={12} color={accentColor} />
-                  <Heading size="lg">Start Trading Today</Heading>
-                  <Text color="gray.500" maxW="md">
-                    Join thousands of traders in the most realistic stock market
-                    simulation
-                  </Text>
-                  <VStack spacing={4} pt={4}>
-                    <Button
-                      as={RouterLink}
-                      to="/signup"
-                      colorScheme="cyan"
-                      size="lg"
-                      leftIcon={<UserPlus size={20} />}
-                      borderRadius="full"
-                      _hover={{ transform: "translateY(-2px)", shadow: "lg" }}>
-                      Create Account
-                    </Button>
-                    <Button
-                      as={RouterLink}
-                      to="/login"
-                      variant="outline"
-                      size="lg"
-                      leftIcon={<LogIn size={20} />}
-                      borderRadius="full"
-                      _hover={{ transform: "translateY(-2px)", shadow: "md" }}>
-                      Sign In
-                    </Button>
-                  </VStack>
-                </VStack>
+        {/* Main Content - use templateColumns that don't overflow */}
+        <Box
+          display="grid"
+          gridTemplateColumns={{ base: "1fr", lg: "2fr 1fr" }}
+          gap={{ base: 4, md: 6 }}
+          w="full">
+          {/* Left Column */}
+          <Box minW={0}>
+            {" "}
+            {/* minW=0 prevents grid item from overflowing */}
+            <VStack spacing={{ base: 4, md: 6 }} align="stretch">
+              {tokens.isAuthenticated() && <PortfolioPreview />}
+
+              <Box>
+                <Flex align="center" mb={3} gap={2}>
+                  <Icon as={Newspaper} color={accentColor} />
+                  <Heading size={{ base: "sm", md: "md" }}>Market News</Heading>
+                </Flex>
+                <Newsfeed symbol="" />
               </Box>
-            </Fade>
-          )}
+            </VStack>
+          </Box>
 
-          {/* Main Content */}
-          <SimpleGrid columns={{ base: 1, lg: 3 }} spacing={6}>
-            {/* Left Column - Portfolio and News */}
-            <Box gridColumn={{ base: "1", lg: "span 2" }}>
-              <VStack spacing={6} align="stretch">
-                {tokens.isAuthenticated() && <PortfolioPreview />}
-
-                {/* News Section */}
-                <Box>
-                  <Flex align="center" mb={4} gap={2}>
-                    <Icon as={Newspaper} color={accentColor} />
-                    <Heading size="md">Market News</Heading>
-                  </Flex>
-                  <Newsfeed symbol="" />
-                </Box>
+          {/* Right Column */}
+          {tokens.isAuthenticated() && (
+            <Box minW={0}>
+              {" "}
+              {/* minW=0 prevents grid item from overflowing */}
+              <VStack spacing={{ base: 4, md: 6 }} align="stretch">
+                <PositionsList />
+                <Watchlist />
               </VStack>
             </Box>
-
-            {/* Right Column - Positions and Watchlist */}
-            {tokens.isAuthenticated() && (
-              <Box gridColumn={{ base: "1", lg: "3" }}>
-                <VStack spacing={6} align="stretch">
-                  <PositionsList />
-                  <Watchlist />
-                </VStack>
-              </Box>
-            )}
-          </SimpleGrid>
-        </VStack>
-      </Container>
+          )}
+        </Box>
+      </VStack>
     </Box>
   );
 }

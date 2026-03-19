@@ -17,6 +17,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
 const StockView = lazy(() => import("./pages/StockView"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
+const Simulation = lazy(() => import("./pages/Simulation"));
 import NotFound from "./pages/NotFound";
 
 export type Transaction = {
@@ -71,8 +72,9 @@ function App() {
       <Navbar />
       <Container
         maxW="container.xl"
-        py={{ base: 1, md: 6 }}
-        px={{ base: 1, md: 4 }}>
+        py={{ base: 2, md: 6 }}
+        px={{ base: 3, md: 4 }}
+        centerContent={false}>
         <AnimatePresence mode="wait">
           <Suspense fallback={<PageLoader />}>
             <Routes location={location} key={location.pathname}>
@@ -121,6 +123,14 @@ function App() {
                 element={
                   <PageWrapper>
                     <NotFound />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/simulation"
+                element={
+                  <PageWrapper>
+                    <Simulation />
                   </PageWrapper>
                 }
               />

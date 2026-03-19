@@ -1,0 +1,37 @@
+/* src/index.css */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* Ensure all images and media are responsive */
+img,
+svg,
+iframe,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fix for flex/grid children */
+.flex-child-no-overflow,
+.grid-child-no-overflow {
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}

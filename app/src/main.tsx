@@ -16,6 +16,7 @@ import { mode } from "@chakra-ui/theme-tools";
 
 import { cardAnatomy } from "@chakra-ui/anatomy";
 import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
+import "./index.css";
 
 const { definePartsStyle, defineMultiStyleConfig } =
   createMultiStyleConfigHelpers(cardAnatomy.keys);
